@@ -1,0 +1,23 @@
+{
+    "manifest_version": 2,
+    "name": "Enterprise Time Submitter",
+    "version": "0.1.0",
+
+    "permissions": ["storage", "tabs", "declarativeContent", "https://rest.tsheets.com/"],
+
+    "background": {
+        "scripts": ["background.js"]
+    },
+    
+    "content_scripts": [
+        {
+            "matches": ["https://enterprise.nscl.msu.edu/timesheets*"],
+            "js": ["content.js"],
+            "run_at": "document_end"
+        }
+    ],
+    "options_ui": {
+        "page": "options.html",
+        "open_in_tab": false
+    }
+}
