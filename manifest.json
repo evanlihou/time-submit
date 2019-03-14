@@ -11,7 +11,7 @@
     
     "content_scripts": [
         {
-            "matches": ["https://enterprise.nscl.msu.edu/timesheets*"],
+            "matches": ["https://enterprise.nscl.msu.edu/timesheets/timesheets/view*"],
             "js": ["content.js"],
             "run_at": "document_end"
         }
