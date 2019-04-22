@@ -9,7 +9,7 @@ chrome.runtime.onMessage.addListener(
                 tsheets_job_id: '',
                 tsheets_user_id: ''
             }, (items) => {
-                if (!items.tsheets_token || !items.tsheets_job_id || !items.tsheets_user_id) {
+                if (!items.tsheets_token || !items.tsheets_user_id) {
                     sendResponse({
                         error: {
                             message: 'One or more configuration values were empty. Please ensure extension options are set.'
@@ -38,9 +38,14 @@ chrome.runtime.onMessage.addListener(
                         return;
                     }
                     var tsData = response.results.timesheets;
+                    var jobCodeData = response.supplemental_data.jobcodes;
                     var dateTotals = {};
                     for (var key in tsData) {
                         var value = tsData[key];
+                        if (jobCodeData[value.jobcode_id]["type"] === "unpaid_break") {
+                            continue;
+                        }
+
                         if (!dateTotals[value.date]) {
                             dateTotals[value.date] = {
                                 seconds: 0,
@@ -54,7 +59,7 @@ chrome.runtime.onMessage.addListener(
                         } else {
                             dateTotals[value.date].seconds += value.duration;
                         }
-                        if (value.notes !== "") dateTotals[value.date].comments.push(value.notes);
+                        if (value.notes !== "" && !dateTotals[value.date].comments.includes(value.notes)) dateTotals[value.date].comments.push(value.notes);
                     }
                     sendResponse(dateTotals);
                 });
