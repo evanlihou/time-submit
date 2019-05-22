@@ -1,0 +1,44 @@
+<html>
+    <head>
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+            <style>
+                body {
+                    margin: 15px;
+                    min-width: 300px;
+                }
+                h2 {
+                    white-space: nowrap;
+                }
+                label {
+                    font-style: italic;
+                }
+
+                .saved {
+                    transition: opacity 1s;
+                }
+
+                #blur_warning {
+                    transition: opacity 1s;
+                    position: absolute;
+                    top: 0; right: 0; bottom: 0; left: 0;
+                    z-index: 10;
+                    background-color: #0008;
+                }
+            </style>
+    </head>
+    <body style="display: none;">
+        <h2>Time info</h2>
+        <div id="blur_warning" class=""></div>
+        <div id="is_clocked_in"></div>
+
+        <div id="shift_time" class="form-group"><label>Shift Duration:</label> <span class="data"></span></div>
+        <div id="shift_span" class="form-group"><span class="data"></span></div>
+
+        <div id="shift_notes" class="form-group"><label>Shift Notes:</label><textarea class="data form-control"></textarea><span class="saved" style="opacity: 0">Saved.</span></div>
+
+        <button class="btn btn-success btn-block" id="clock_in">Clock In</button>
+        <button class="btn btn-warning btn-block" id="clock_out">Clock Out</button>
+
+        <script src="time_info.js"></script>
+    </body>
+</html>

@@ -8,14 +8,27 @@
     "background": {
         "scripts": ["background.js"]
     },
+
+    "omnibox": {
+        "keyword": "time"
+    },
     
     "content_scripts": [
         {
             "matches": ["https://enterprise.nscl.msu.edu/timesheets/timesheets/view*"],
-            "js": ["content.js"],
+            "js": ["content_scripts/submit.js"],
             "run_at": "document_end"
         }
     ],
+
+    "browser_action": {
+        "default_title": "Time Tracking",
+        "default_popup": "time_info.html",
+        "default_icon": {
+            "64": "icon_64.png"
+        }
+    },
+
     "options_ui": {
         "page": "options.html",
         "open_in_tab": false
