@@ -1,5 +1,5 @@
 export default function updateNotes(request, _sender, sendResponse) {
-    console.log("Updating notes");
+    console.log('Updating notes');
     console.log(request)
     chrome.storage.sync.get({
         tsheets_token: '',
@@ -30,14 +30,14 @@ export default function updateNotes(request, _sender, sendResponse) {
             },
             body: data
         }).then(response => {
-            console.log("Got response with code " + response.status);
+            console.log('Got response with code ' + response.status);
             if (response.status !== 200) {
                 sendResponse({error: {
                     statusCode: response.status,
-                    message: "Got response with code " + response.status
+                    message: 'Got response with code ' + response.status
                 }})
             } else {
-                sendResponse({success: ""});
+                sendResponse({success: ''});
             }
         });
     });

@@ -1,6 +1,6 @@
 import formatGetParams from '../helpers/formatGetParams.js';
 
-const TIMESHEET_URL = "https://rest.tsheets.com/api/v1/timesheets";
+const TIMESHEET_URL = 'https://rest.tsheets.com/api/v1/timesheets';
 
 export default function submitTime(request, _sender, sendResponse) {
     if (request.getTimesheet) {
@@ -26,7 +26,7 @@ export default function submitTime(request, _sender, sendResponse) {
                 on_the_clock: 'both'
             };
             fetch(TIMESHEET_URL + formatGetParams(params), {
-                headers: {"Authorization": "Bearer " + items.tsheets_token}
+                headers: {'Authorization': 'Bearer ' + items.tsheets_token}
             }).then(res => res.json())
             .then(response => {
                 console.log(response);
@@ -43,7 +43,7 @@ export default function submitTime(request, _sender, sendResponse) {
                 var dateTotals = {};
                 for (var key in tsData) {
                     var value = tsData[key];
-                    if (jobCodeData[value.jobcode_id]["type"] === "unpaid_break") {
+                    if (jobCodeData[value.jobcode_id]['type'] === 'unpaid_break') {
                         continue;
                     }
 
@@ -60,7 +60,7 @@ export default function submitTime(request, _sender, sendResponse) {
                     } else {
                         dateTotals[value.date].seconds += value.duration;
                     }
-                    if (value.notes !== "" && !dateTotals[value.date].comments.includes(value.notes)) dateTotals[value.date].comments.push(value.notes);
+                    if (value.notes !== '' && !dateTotals[value.date].comments.includes(value.notes)) dateTotals[value.date].comments.push(value.notes);
                 }
                 sendResponse(dateTotals);
             });

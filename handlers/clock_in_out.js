@@ -12,7 +12,7 @@
  * @param {function} sendResponse           - Callback for the response
  */
 function clockIn(request, _sender, sendResponse) {
-    console.log("Clocking in");
+    console.log('Clocking in');
 
 }
 
@@ -24,7 +24,7 @@ function clockIn(request, _sender, sendResponse) {
  * @param {function} sendResponse           - Callback for the response
  */
 function clockOut(request, _sender, sendResponse) {
-    console.log("Clocking out");
+    console.log('Clocking out');
 
     chrome.storage.sync.get({
         tsheets_token: '',
@@ -43,8 +43,8 @@ function clockOut(request, _sender, sendResponse) {
         var data = JSON.stringify({
             data: [{
                 id: request.clockOut.timesheetId,
-                end: new moment().format("Y-MM-DDTHH:mm:ssZ"),
-                origin_hint_end: "Timetrack Chrome Extension"
+                end: new moment().format('Y-MM-DDTHH:mm:ssZ'),
+                origin_hint_end: 'Timetrack Chrome Extension'
             }]
         });
 
@@ -56,14 +56,14 @@ function clockOut(request, _sender, sendResponse) {
             },
             body: data
         }).then(response => {
-            console.log("Got response with code " + response.status);
+            console.log('Got response with code ' + response.status);
             if (response.status !== 200) {
                 sendResponse({error: {
                     statusCode: response.status,
-                    message: "Got response with code " + response.status
+                    message: 'Got response with code ' + response.status
                 }})
             } else {
-                sendResponse({success: ""});
+                sendResponse({success: ''});
             }
         });
     });

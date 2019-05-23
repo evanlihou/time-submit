@@ -1,5 +1,5 @@
 function fillTime() {
-    const weekStr = document.getElementsByName("data[week_no]")[0].value;
+    const weekStr = document.getElementsByName('data[week_no]')[0].value;
     const week = {
         weekNo: weekStr.substring(4,6),
         yearNo: weekStr.substring(0,4)
@@ -15,7 +15,7 @@ function fillTime() {
         if (response.error) {
             alert(response.error.message);
         } else {
-            document.querySelectorAll(".timesheets").forEach(function (el, i, arr) {
+            document.querySelectorAll('.timesheets').forEach(function (el, i, arr) {
                 el.classList.remove('hide-weekends');
             });
             for (var day in response) {
@@ -55,10 +55,10 @@ Date.prototype.toISODateString = function () {
     return this.toISOString().slice(0,10);
 }
 
-let autoFillButton = document.createElement("button");
+let autoFillButton = document.createElement('button');
 autoFillButton.addEventListener('click', fillTime, false)
-autoFillButton.innerText = "Fill From TSheets";
-autoFillButton.style.position = "fixed";
-autoFillButton.style.bottom = "5px";
-autoFillButton.style.right = "5px";
+autoFillButton.innerText = 'Fill From TSheets';
+autoFillButton.style.position = 'fixed';
+autoFillButton.style.bottom = '5px';
+autoFillButton.style.right = '5px';
 document.body.appendChild(autoFillButton);

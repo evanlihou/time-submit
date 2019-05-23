@@ -1,15 +1,14 @@
 import Cache from '../helpers/cache.js';
 
 var cache = new Cache();
-window.cache = cache
 
 export default function getCurrentStatus(_request, _sender, sendResponse) {
     // Sometimes the message will send twice. Cache it for a bit to keep API usage down
-    if (cache.loading === true) {cache.addCallback(sendResponse); return true;}
-    else if (cache.data !== null) {sendResponse(cache.data)}
+    if (cache.loading === true) { cache.addCallback(sendResponse); return true; }
+    else if (cache.data !== null) { sendResponse(cache.data) }
 
     // Action
-    console.log("Getting current status")
+    console.log('Getting current status')
     cache.loading = true;
     callApiForCurrent(sendResponse, cache)
     return true;
@@ -32,7 +31,7 @@ function callApiForCurrent(sendResponse, cache) {
 
         var data = JSON.stringify({
             data: {
-                on_the_clock: "both",
+                on_the_clock: 'both',
                 user_ids: items.tsheets_user_id
             }
         });

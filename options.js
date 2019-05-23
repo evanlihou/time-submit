@@ -1,7 +1,11 @@
+/**
+ * @file Getter and setter for extension options. Accessed through chrome://extensions
+ */
+
 var fields = [
-    "tsheets_token",
-    "tsheets_job_id",
-    "tsheets_user_id"
+    'tsheets_token',
+    'tsheets_job_id',
+    'tsheets_user_id'
 ]
 
 function save_options() {

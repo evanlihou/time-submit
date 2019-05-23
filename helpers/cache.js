@@ -1,3 +1,7 @@
+/**
+ * @file A helper to allow short-term caching of data
+ */
+
 /** A short lived cache
  *  @template TDataType 
 */
@@ -30,13 +34,13 @@ export default class Cache {
         this.loading = false;
         this.callbacks.forEach(c => c(v));
         // Reset after a bit to prevent stale data
-        setTimeout(this.reset.bind(this), 2*1000);
+        setTimeout(this.reset.bind(this), 2 * 1000);
     }
 
     get data() {
         var tmp = this._data;
         // If we're returning an object, add a note that this was cached
-        if (typeof tmp === "object" && tmp !== null) tmp.isCached = true;
+        if (typeof tmp === 'object' && tmp !== null) tmp.isCached = true;
         return tmp;
     }
 

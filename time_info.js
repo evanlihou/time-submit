@@ -1,3 +1,7 @@
+/**
+ * @file Logic for the time info browser action popup
+ */
+
 class TimeInfo {
     constructor() {
         
@@ -5,7 +9,7 @@ class TimeInfo {
         this.shiftNotesEl = document.getElementById('shift_notes')
         this.shiftNotesInput = this.shiftNotesEl.getElementsByTagName('textarea')[0]
 
-        this.confirmModalEl = document.getElementById("confirm_modal");
+        this.confirmModalEl = document.getElementById('confirm_modal');
         this.confirmModal = new Modal(this.confirmModalEl, {});
 
         this.clockInButton = document.getElementById('clock_in')
@@ -25,7 +29,7 @@ class TimeInfo {
         // Don't spam the network when the popup is closed
         window.onblur = () => {
             clearInterval(this.repeat);
-            console.log("BLURRED. Will no longer update.");
+            console.log('BLURRED. Will no longer update.');
             setTimeout(() => {
                 this.blurWarningEl.style.display = 'block';
                 setTimeout(() => this.blurWarningEl.style.opacity = 1, 10)
@@ -35,7 +39,7 @@ class TimeInfo {
         window.onfocus = () => {
             clearInterval(this.repeat);
             this.repeat = setInterval(this.heartbeat.bind(this), 3000);
-            console.log("Got focus. Updates resumed.");
+            console.log('Got focus. Updates resumed.');
             this.blurWarningEl.style.display = 'none';
             this.blurWarningEl.style.opacity = 0;
         }
@@ -65,7 +69,7 @@ class TimeInfo {
     }
 
     heartbeat() {
-        console.log("Heartbeat")
+        console.log('Heartbeat')
         chrome.runtime.sendMessage({getNow: {}}, (response) => {
             if (response) {
                 if (response.error) {
@@ -78,8 +82,8 @@ class TimeInfo {
 
                 var isClockedInEl = document.getElementById('is_clocked_in')
                 if (response.status.clockedIn) {
-                    isClockedInEl.innerText = "Clocked In"
-                    isClockedInEl.className = "alert alert-success"
+                    isClockedInEl.innerText = 'Clocked In'
+                    isClockedInEl.className = 'alert alert-success'
                     this.confirmModal.setContent(`
                     <div class="modal-header">
                         <h5 class="modal-title">Clock Out</h5>
@@ -99,16 +103,16 @@ class TimeInfo {
                             if (!response.error) this.confirmModal.hide();
                         });
                     }
-                    this.clockInButton.style.display = "none"
-                    this.clockOutButton.style.display = "block"
+                    this.clockInButton.style.display = 'none'
+                    this.clockOutButton.style.display = 'block'
                 } else {
-                    isClockedInEl.innerText = "Clocked Out"
-                    isClockedInEl.className = "alert alert-warning"
+                    isClockedInEl.innerText = 'Clocked Out'
+                    isClockedInEl.className = 'alert alert-warning'
                     // this.clockInConfirmButton.onclick = () => {
                     //     chrome.runtime.sendMessage({clockIn: {}});
                     // }
-                    this.clockOutButton.style.display = "none"
-                    this.clockInButton.style.display = "block"
+                    this.clockOutButton.style.display = 'none'
+                    this.clockInButton.style.display = 'block'
                 }
 
                 var shiftTimeEl = document.querySelector('#shift_time .data');
@@ -121,17 +125,17 @@ class TimeInfo {
                     var start = new Date(response.status.start);
                     var end = response.status.end ? new Date(response.status.end) : null;
 
-                    this.shiftSpanEl.innerHTML = this.formatTime(start) + " &ndash; " + (end ? this.formatTime(end) : "now")
+                    this.shiftSpanEl.innerHTML = this.formatTime(start) + ' &ndash; ' + (end ? this.formatTime(end) : 'now')
 
-                    if (shiftTimeEl.parentElement.style.display === "none") shiftTimeEl.parentElement.style.display = "block";
-                    if (this.shiftNotesEl.style.display === "none") this.shiftNotesEl.style.display = "block";
+                    if (shiftTimeEl.parentElement.style.display === 'none') shiftTimeEl.parentElement.style.display = 'block';
+                    if (this.shiftNotesEl.style.display === 'none') this.shiftNotesEl.style.display = 'block';
                 } else {
-                    shiftTimeEl.parentElement.style.display = "none";
-                    this.shiftNotesEl.style.display = "none";
+                    shiftTimeEl.parentElement.style.display = 'none';
+                    this.shiftNotesEl.style.display = 'none';
                 }
 
                 var body = document.getElementsByTagName('body')[0];
-                if (body.style.display === "none") body.style.display = "block"
+                if (body.style.display === 'none') body.style.display = 'block'
             }
         });
     }
@@ -145,7 +149,7 @@ class TimeInfo {
     //user is finished typing, do something
     doneTyping () {
         console.log(this.timesheetId)
-        console.log("Done typing")
+        console.log('Done typing')
         if (this.timesheetId) {
             chrome.runtime.sendMessage({updateNotes: {
                 timesheetId: this.timesheetId,
