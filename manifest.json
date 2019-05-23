@@ -6,7 +6,7 @@
     "permissions": ["storage", "tabs", "declarativeContent", "https://rest.tsheets.com/"],
 
     "background": {
-        "scripts": ["background.js"]
+        "scripts": ["vendor/moment.js", "background.js"]
     },
 
     "omnibox": {

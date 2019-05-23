@@ -23,6 +23,7 @@
                     top: 0; right: 0; bottom: 0; left: 0;
                     z-index: 10;
                     background-color: #0008;
+                    display: none;
                 }
             </style>
     </head>
@@ -37,8 +38,21 @@
         <div id="shift_notes" class="form-group"><label>Shift Notes:</label><textarea class="data form-control"></textarea><span class="saved" style="opacity: 0">Saved.</span></div>
 
         <button class="btn btn-success btn-block" id="clock_in">Clock In</button>
-        <button class="btn btn-warning btn-block" id="clock_out">Clock Out</button>
+        <button class="btn btn-warning btn-block" id="clock_out" data-toggle="modal" data-target="#confirm_modal">Clock Out</button>
 
+        <div class="modal" tabindex="-1" role="dialog" id="confirm_modal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap.native/2.0.26/bootstrap-native-v4.min.js"></script><!-- Who needs jQuery anyway? -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
         <script src="time_info.js"></script>
+        <script>
+            var timeInfo = new TimeInfo();
+        </script>
     </body>
 </html>

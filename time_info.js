@@ -1,109 +1,169 @@
-var infoEl = document.createElement('div');
-document.getElementsByTagName('body')[0].appendChild(infoEl);
+class TimeInfo {
+    constructor() {
+        
+        this.shiftSpanEl = document.getElementById('shift_span')
+        this.shiftNotesEl = document.getElementById('shift_notes')
+        this.shiftNotesInput = this.shiftNotesEl.getElementsByTagName('textarea')[0]
 
-var clockedInEl = document.getElementById('is_clocked_in')
-var shiftTimeEl = document.querySelector('#shift_time .data');
-var shiftSpanEl = document.getElementById('shift_span')
-var shiftNotesEl = document.getElementById('shift_notes')
-var shiftNotesInput = shiftNotesEl.getElementsByTagName('textarea')[0]
+        this.confirmModalEl = document.getElementById("confirm_modal");
+        this.confirmModal = new Modal(this.confirmModalEl, {});
 
-var clockInButton = document.getElementById('clock_in')
-var clockOutButton = document.getElementById('clock_out')
+        this.clockInButton = document.getElementById('clock_in')
+        this.clockInConfirmButton = document.getElementById('clock_in_confirm')
 
-var blurWarningEl = document.getElementById('blur_warning');
+        this.clockOutButton = document.getElementById('clock_out')
+        
 
-var timesheetId = null; // Store the active timesheet
-var notesEdited = false;
+        this.blurWarningEl = document.getElementById('blur_warning');
 
-heartbeat();
-var repeat = setInterval(heartbeat, 3000);
+        this.timesheetId = null; // Store the active timesheet
+        this.notesEdited = false;
 
-// Don't spam the network when the popup is closed
-window.onblur = () => {clearInterval(repeat); console.log("BLURRED. Will no longer update."); setTimeout(() => {blurWarningEl.style.display = 'block'; setTimeout(() => blurWarningEl.style.opacity = 1, 10)}, 300)}
-window.onfocus = () => {clearInterval(repeat); repeat = setInterval(heartbeat, 3000); console.log("Got focus. Updates resumed."); blurWarningEl.style.display = 'none'; blurWarningEl.style.opacity = 0}
+        this.heartbeat();
+        this.repeat = setInterval(this.heartbeat, 3000);
 
-function heartbeat() {
-    console.log("Heartbeat")
-    chrome.runtime.sendMessage({getNow: {}}, (response) => {
-        console.log(response)
-        if (response) {
-            if (response.error) {
-                console.error(response.error.message);
-                clearInterval(repeat);
-            } else if (response.onCooldown) {
-                console.log('cooling down')
-            } else {
-                timesheetId = response.status.timesheetId;
+        // Don't spam the network when the popup is closed
+        window.onblur = () => {
+            clearInterval(this.repeat);
+            console.log("BLURRED. Will no longer update.");
+            setTimeout(() => {
+                this.blurWarningEl.style.display = 'block';
+                setTimeout(() => this.blurWarningEl.style.opacity = 1, 10)
+            }, 300)
+        }
 
-                if (response.status.clockedIn) {
-                    clockedInEl.innerText = "Clocked In"
-                    clockedInEl.className = "alert alert-success"
+        window.onfocus = () => {
+            clearInterval(this.repeat);
+            this.repeat = setInterval(this.heartbeat.bind(this), 3000);
+            console.log("Got focus. Updates resumed.");
+            this.blurWarningEl.style.display = 'none';
+            this.blurWarningEl.style.opacity = 0;
+        }
 
-                    clockInButton.style.display = "none"
-                } else {
-                    clockedInEl.innerText = "Clocked Out"
-                    clockedInEl.className = "alert alert-warning"
+        var typingTimer;                //timer identifier
+        var doneTypingInterval = 2000;  //time in ms
 
-                    clockOutButton.style.display = "none"
-                }
-                shiftTimeEl.innerText = response.status.shift_time
+        //on keyup, start the countdown
+        this.shiftNotesEl.onkeyup = () => {
+            this.notesEdited = true;
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(this.doneTyping.bind(this), doneTypingInterval);
+        }
 
-                if (!notesEdited)
-                    shiftNotesInput.value = response.status.shift_notes
+        //on keydown, clear the countdown 
+        this.shiftNotesEl.onkeydown = () => {
+            clearTimeout(typingTimer);
+        }
 
-                var start = new Date(response.status.start);
-                var end = response.status.end ? new Date(response.status.end) : null;
-
-                shiftSpanEl.innerHTML = formatTime(start) + " &ndash; " + (end ? formatTime(end) : "now")
-
-                if (document.getElementsByTagName('body')[0].style.display === "none") document.getElementsByTagName('body')[0].style.display = "block"
+        this.shiftNotesInput.onblur = () =>{
+            // If textarea loses focus, immediately save changes
+            if (this.notesEdited) {
+                clearTimeout(typingTimer);
+                this.doneTyping();
             }
         }
-    });
-}
+    }
 
-function formatTime(date) {
-    var timeWithAmPm = date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
-    // Slice off AM/PM
-    return timeWithAmPm.substr(0, timeWithAmPm.length-3)
-}
+    heartbeat() {
+        console.log("Heartbeat")
+        chrome.runtime.sendMessage({getNow: {}}, (response) => {
+            if (response) {
+                if (response.error) {
+                    console.error(response.error.message);
+                    clearInterval(this.repeat);
+                } else if (response.isCached === true) {
+                    console.log('Got a cached response')
+                }
+                this.timesheetId = response.status.timesheetId;
 
-var typingTimer;                //timer identifier
-var doneTypingInterval = 2000;  //time in ms
+                var isClockedInEl = document.getElementById('is_clocked_in')
+                if (response.status.clockedIn) {
+                    isClockedInEl.innerText = "Clocked In"
+                    isClockedInEl.className = "alert alert-success"
+                    this.confirmModal.setContent(`
+                    <div class="modal-header">
+                        <h5 class="modal-title">Clock Out</h5>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to clock out?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-warning" id="clock_out_confirm">Confirm</button>
+                    </div>
+                    `);
+                    var clockOutConfirmButton = document.getElementById('clock_out_confirm')
+                    clockOutConfirmButton.onclick = () => {
+                        chrome.runtime.sendMessage({clockOut: {timesheetId: this.timesheetId}}, (response) => {
+                            console.log(response);
+                            if (!response.error) this.confirmModal.hide();
+                        });
+                    }
+                    this.clockInButton.style.display = "none"
+                    this.clockOutButton.style.display = "block"
+                } else {
+                    isClockedInEl.innerText = "Clocked Out"
+                    isClockedInEl.className = "alert alert-warning"
+                    // this.clockInConfirmButton.onclick = () => {
+                    //     chrome.runtime.sendMessage({clockIn: {}});
+                    // }
+                    this.clockOutButton.style.display = "none"
+                    this.clockInButton.style.display = "block"
+                }
 
-//on keyup, start the countdown
-shiftNotesEl.onkeyup = () => {
-    notesEdited = true;
-  clearTimeout(typingTimer);
-  typingTimer = setTimeout(doneTyping, doneTypingInterval);
-}
+                var shiftTimeEl = document.querySelector('#shift_time .data');
+                shiftTimeEl.innerText = response.status.shift_time
 
-//on keydown, clear the countdown 
-shiftNotesEl.onkeydown = () => {
-  clearTimeout(typingTimer);
-}
+                if (response.status.timesheetId) {
+                    if (!this.notesEdited)
+                    this.shiftNotesInput.value = response.status.shift_notes
 
-//user is "finished typing," do something
-function doneTyping () {
-    console.log(timesheetId)
-    console.log("done")
-    if (timesheetId) {
-        chrome.runtime.sendMessage({updateNotes: {
-            timesheetId: timesheetId,
-            notes: shiftNotesInput.value}
-        }, (response) => {
-            notesEdited = false;
-            if (response.error) {
-                var errorAlert = document.createElement('div');
-                errorAlert.className = 'alert alert-danger';
-                errorAlert.innerText = response.error.message;
-                shiftNotesEl.appendChild(errorAlert);
-            } else {
-                // Tell the user it saved
-                shiftNotesEl.querySelector('.saved').style.opacity = 1;
-                setTimeout(() => {shiftNotesEl.querySelector('.saved').style.opacity = 0}, 3000);
+                    var start = new Date(response.status.start);
+                    var end = response.status.end ? new Date(response.status.end) : null;
+
+                    this.shiftSpanEl.innerHTML = this.formatTime(start) + " &ndash; " + (end ? this.formatTime(end) : "now")
+
+                    if (shiftTimeEl.parentElement.style.display === "none") shiftTimeEl.parentElement.style.display = "block";
+                    if (this.shiftNotesEl.style.display === "none") this.shiftNotesEl.style.display = "block";
+                } else {
+                    shiftTimeEl.parentElement.style.display = "none";
+                    this.shiftNotesEl.style.display = "none";
+                }
+
+                var body = document.getElementsByTagName('body')[0];
+                if (body.style.display === "none") body.style.display = "block"
             }
         });
-        
+    }
+
+    formatTime(date) {
+        var timeWithAmPm = date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
+        // Slice off AM/PM
+        return timeWithAmPm.substr(0, timeWithAmPm.length-3)
+    }
+
+    //user is finished typing, do something
+    doneTyping () {
+        console.log(this.timesheetId)
+        console.log("Done typing")
+        if (this.timesheetId) {
+            chrome.runtime.sendMessage({updateNotes: {
+                timesheetId: this.timesheetId,
+                notes: this.shiftNotesInput.value}
+            }, (response) => {
+                this.notesEdited = false;
+                if (response.error) {
+                    var errorAlert = document.createElement('div');
+                    errorAlert.className = 'alert alert-danger';
+                    errorAlert.innerText = response.error.message;
+                    this.shiftNotesEl.appendChild(errorAlert);
+                } else {
+                    // Tell the user it saved
+                    this.shiftNotesEl.querySelector('.saved').style.opacity = 1;
+                    setTimeout(() => {this.shiftNotesEl.querySelector('.saved').style.opacity = 0}, 3000);
+                }
+            });
+            
+        }
     }
 }

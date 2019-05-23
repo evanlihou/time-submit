@@ -1,19 +1,18 @@
+import Cache from '../helpers/cache.js';
+
 var cache = new Cache();
+window.cache = cache
 
-export default function getCurrentStatus(request, _sender, sendResponse) {
-    if (request.getNow) {
-        // Sometimes the message will send twice. Cache it for a bit to keep API usage down
-        if (cache.loading() === true) {cache.addCallback(sendResponse); return true;}
-        else if (cache.get() !== null) {sendResponse(cache.get())}
+export default function getCurrentStatus(_request, _sender, sendResponse) {
+    // Sometimes the message will send twice. Cache it for a bit to keep API usage down
+    if (cache.loading === true) {cache.addCallback(sendResponse); return true;}
+    else if (cache.data !== null) {sendResponse(cache.data)}
 
-        setTimeout(() => {cache.reset();}, 2000);
-
-        // Action
-        console.log("GETTING")
-        cache.loading(true);
-        callApiForCurrent(sendResponse, cache)
-        return true;
-    }
+    // Action
+    console.log("Getting current status")
+    cache.loading = true;
+    callApiForCurrent(sendResponse, cache)
+    return true;
 }
 
 function callApiForCurrent(sendResponse, cache) {
@@ -47,58 +46,21 @@ function callApiForCurrent(sendResponse, cache) {
             body: data
         }).then(response => response.json()).then(response => {
             console.log(response);
-            var timesheet = response.supplemental_data.timesheets[Object.keys(response.supplemental_data.timesheets)];
+            if (response.supplemental_data.timesheets)
+                var timesheet = response.supplemental_data.timesheets[response.results.current_totals[items.tsheets_user_id].timesheet_id];
             var retVal = {
                 status: {
                     timesheetId: response.results.current_totals[items.tsheets_user_id].timesheet_id,
                     clockedIn: response.results.current_totals[items.tsheets_user_id].on_the_clock,
-                    start: timesheet.start,
-                    end: timesheet.end,
+                    start: timesheet ? timesheet.start : null,
+                    end: timesheet ? timesheet.end : null,
                     shift_time: new Date(response.results.current_totals[items.tsheets_user_id].shift_seconds * 1000).toISOString().substr(11, 5),
-                    shift_notes: timesheet.notes
+                    shift_notes: timesheet ? timesheet.notes : null
                 }
             }
             sendResponse(retVal)
-            cache.set(retVal);
+            cache.data = retVal;
         });
     });
 }
 
-function Cache() {
-    var data = null;
-    var loading = false;
-    var callbacks = [];
-
-    // Add something to notify when we're set
-    this.addCallback = function(c) {
-        callbacks.push(c);
-    }
-
-    // Set the value and notify people interested
-    this.set = function(v) {
-        data = v;
-        loading = false;
-        
-        callbacks.forEach(c => c(this.get()));
-    }
-
-    // Get the current value
-    this.get = function() {
-        var tmp = data;
-        if (typeof tmp === "object" && tmp !== null) tmp.isCached = true;
-        return tmp;
-    }
-
-    // Are we loading? Getter and setter.
-    this.loading = function(val) {
-        if (val) loading = val;
-        return loading;
-    }
-
-    // Reset the cache
-    this.reset = function() {
-        data = null;
-        loading = false;
-        callbacks = [];
-    }
-}
