@@ -1,20 +1,21 @@
 import Cache from '../helpers/cache.js';
+import setIconStatus from './set_icon_status.js';
 
 var cache = new Cache();
 
-export default function getCurrentStatus(_request, _sender, sendResponse) {
+export default function getCurrentStatus(request, _sender, sendResponse) {
+    console.log('Message: Getting current status')
     // Sometimes the message will send twice. Cache it for a bit to keep API usage down
     if (cache.loading === true) { cache.addCallback(sendResponse); return true; }
     else if (cache.data !== null) { sendResponse(cache.data) }
 
     // Action
-    console.log('Getting current status')
     cache.loading = true;
-    callApiForCurrent(sendResponse, cache)
+    callApiForCurrent(request, sendResponse, cache)
     return true;
 }
 
-function callApiForCurrent(sendResponse, cache) {
+function callApiForCurrent(request, sendResponse, cache) {
     chrome.storage.sync.get({
         tsheets_token: '',
         tsheets_job_id: '',
@@ -44,7 +45,6 @@ function callApiForCurrent(sendResponse, cache) {
             },
             body: data
         }).then(response => response.json()).then(response => {
-            console.log(response);
             if (response.supplemental_data.timesheets)
                 var timesheet = response.supplemental_data.timesheets[response.results.current_totals[items.tsheets_user_id].timesheet_id];
             var retVal = {
@@ -58,6 +58,9 @@ function callApiForCurrent(sendResponse, cache) {
                 }
             }
             sendResponse(retVal)
+            if (request !== null && request.getNow.updateIcon === true) {
+                setIconStatus(retVal);
+            }
             cache.data = retVal;
         });
     });

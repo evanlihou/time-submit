@@ -29,7 +29,6 @@ export default function submitTime(request, _sender, sendResponse) {
                 headers: {'Authorization': 'Bearer ' + items.tsheets_token}
             }).then(res => res.json())
             .then(response => {
-                console.log(response);
                 if (!response.results) {
                     sendResponse({
                         error: {

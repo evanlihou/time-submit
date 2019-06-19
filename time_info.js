@@ -17,11 +17,12 @@ class TimeInfo {
 
         this.clockOutButton = document.getElementById('clock_out')
         
-
         this.blurWarningEl = document.getElementById('blur_warning');
 
         this.timesheetId = null; // Store the active timesheet
         this.notesEdited = false;
+
+        this.isClockedIn = null;
 
         this.heartbeat();
         this.repeat = setInterval(this.heartbeat, 3000);
@@ -66,11 +67,65 @@ class TimeInfo {
                 this.doneTyping();
             }
         }
+
+        this.confirmModalEl.addEventListener('shown.bs.modal', (e) => {
+            if (this.isClockedIn) {
+                this.confirmModal.setContent(`
+                <div class="modal-header">
+                    <h5 class="modal-title">Clock Out</h5>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to clock out?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" id="clock_out_confirm">Confirm</button>
+                </div>
+                `);
+                var clockOutConfirmButton = document.getElementById('clock_out_confirm')
+                clockOutConfirmButton.onclick = () => {
+                    chrome.runtime.sendMessage({clockOut: {timesheetId: this.timesheetId}}, (response) => {
+                        if (!response.error) this.confirmModal.hide();
+                    });
+                    }
+            } else {
+                this.confirmModal.setContent(`
+                <div class="modal-header">
+                    <h5 class="modal-title">Clock In</h5>
+                </div>
+                <div class="modal-body">
+                    Select assignment to clock in to.
+                    <select id="jobs-select"></select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" id="clock_in_confirm">Confirm</button>
+                </div>
+                `);
+                
+                var clockInConfirmButton = document.getElementById('clock_in_confirm')
+                clockInConfirmButton.onclick = () => {
+                    var jobId = document.getElementById('jobs-select').value;
+                    chrome.runtime.sendMessage({clockIn: {jobId: jobId}}, (response) => {
+                        if (!response.error) this.confirmModal.hide();
+                    });
+                }
+                var jobsSelectEl = document.getElementById('jobs-select');
+                chrome.runtime.sendMessage({getJobs: {updateIcon: true}}, (resp) => {
+                    for (var job of resp.jobs) {
+                        var optionEl = document.createElement('option');
+                        optionEl.value = job.id;
+                        optionEl.text = job.name;
+                        jobsSelectEl.appendChild(optionEl);
+                    }
+                })
+            }
+        });
     }
 
     heartbeat() {
         console.log('Heartbeat')
-        chrome.runtime.sendMessage({getNow: {}}, (response) => {
+        chrome.runtime.sendMessage({getNow: {updateIcon: true}}, (response) => {
             if (response) {
                 if (response.error) {
                     console.error(response.error.message);
@@ -78,39 +133,21 @@ class TimeInfo {
                 } else if (response.isCached === true) {
                     console.log('Got a cached response')
                 }
+
                 this.timesheetId = response.status.timesheetId;
 
                 var isClockedInEl = document.getElementById('is_clocked_in')
+                this.isClockedIn = response.status.clockedIn;
                 if (response.status.clockedIn) {
                     isClockedInEl.innerText = 'Clocked In'
                     isClockedInEl.className = 'alert alert-success'
-                    this.confirmModal.setContent(`
-                    <div class="modal-header">
-                        <h5 class="modal-title">Clock Out</h5>
-                    </div>
-                    <div class="modal-body">
-                        Are you sure you want to clock out?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-warning" id="clock_out_confirm">Confirm</button>
-                    </div>
-                    `);
-                    var clockOutConfirmButton = document.getElementById('clock_out_confirm')
-                    clockOutConfirmButton.onclick = () => {
-                        chrome.runtime.sendMessage({clockOut: {timesheetId: this.timesheetId}}, (response) => {
-                            console.log(response);
-                            if (!response.error) this.confirmModal.hide();
-                        });
-                    }
+                    
                     this.clockInButton.style.display = 'none'
                     this.clockOutButton.style.display = 'block'
                 } else {
                     isClockedInEl.innerText = 'Clocked Out'
                     isClockedInEl.className = 'alert alert-warning'
-                    // this.clockInConfirmButton.onclick = () => {
-                    //     chrome.runtime.sendMessage({clockIn: {}});
-                    // }
+
                     this.clockOutButton.style.display = 'none'
                     this.clockInButton.style.display = 'block'
                 }
@@ -148,8 +185,7 @@ class TimeInfo {
 
     //user is finished typing, do something
     doneTyping () {
-        console.log(this.timesheetId)
-        console.log('Done typing')
+        console.log('User finished typing, handling notes update')
         if (this.timesheetId) {
             chrome.runtime.sendMessage({updateNotes: {
                 timesheetId: this.timesheetId,

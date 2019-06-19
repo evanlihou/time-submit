@@ -5,17 +5,14 @@ function fillTime() {
         yearNo: weekStr.substring(0,4)
     }
     const weekBounds = getDateOfISOWeek(week.weekNo, week.yearNo);
-    console.log(weekBounds);
-
     chrome.runtime.sendMessage({getTimesheet: {
         start: weekBounds.start.toISODateString(),
         end: weekBounds.end.toISODateString()
     }}, function (response) {
-        console.log(response)
         if (response.error) {
             alert(response.error.message);
         } else {
-            document.querySelectorAll('.timesheets').forEach(function (el, i, arr) {
+            document.querySelectorAll('.timesheets').forEach(function (el, _i, _arr) {
                 el.classList.remove('hide-weekends');
             });
             for (var day in response) {
@@ -27,7 +24,6 @@ function fillTime() {
                 // Trigger onchange for sums
                 var evt = new Event('change');
                 el.dispatchEvent(evt);
-                console.log(dayIndex, day);
             }
         }
     })

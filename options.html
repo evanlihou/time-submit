@@ -1,9 +1,29 @@
-<label for="tsheets_token">TSheets Token: </label><input id="tsheets_token" />
-<br />
-<label for="tsheets_job_id">TSheets Job ID: </label><input id="tsheets_job_id" />
-<br />
-<label for="tsheets_user_id">TSheets User ID: </label><input id="tsheets_user_id" />
-<br />
-<button id="save">Save</button>
-
-<script src="options.js"></script>
+<html>
+    <head>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <title>Settings - Time Submit</title>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Settings</h2>
+            <form>
+                <div class="form-group">
+                        <label for="tsheets_token">TSheets Token</label>
+                        <input class="form-control" id="tsheets_token" />
+                </div>
+                <div class="form-group">
+                    <label for="tsheets_job_id">TSheets Job ID</label>
+                    <input class="form-control" aria-describedby="tsheets_job_id_help" id="tsheets_job_id" />
+                    <small id="tsheets_job_id_help" class="form-text text-muted">If left blank, all entries which are not unpaid breaks will be counted.</small>
+                </div>
+                <div class="form-group">
+                    <label for="tsheets_user_id">TSheets User ID</label>
+                    <input class="form-control" id="tsheets_user_id" />
+                </div>
+                <button id="save" class="btn btn-primary">Save</button>
+            </form>
+        </div>
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap.native/2.0.26/bootstrap-native-v4.min.js"></script>Who needs jQuery anyway? -->
+        <script src="options.js"></script>
+    </body>
+</html>

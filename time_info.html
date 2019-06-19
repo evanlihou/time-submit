@@ -29,6 +29,7 @@
     </head>
     <body style="display: none;">
         <h2>Time info</h2>
+        <a href="options.html" target="_blank">Settings</a>
         <div id="blur_warning" class=""></div>
         <div id="is_clocked_in"></div>
 
@@ -37,7 +38,7 @@
 
         <div id="shift_notes" class="form-group"><label>Shift Notes:</label><textarea class="data form-control"></textarea><span class="saved" style="opacity: 0">Saved.</span></div>
 
-        <button class="btn btn-success btn-block" id="clock_in">Clock In</button>
+        <button class="btn btn-success btn-block" id="clock_in" data-toggle="modal" data-target="#confirm_modal">Clock In</button>
         <button class="btn btn-warning btn-block" id="clock_out" data-toggle="modal" data-target="#confirm_modal">Clock Out</button>
 
         <div class="modal" tabindex="-1" role="dialog" id="confirm_modal">
