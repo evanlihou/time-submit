@@ -152,6 +152,12 @@ class TimeInfo {
                     this.clockInButton.style.display = 'block'
                 }
 
+                var weekTimeEl = document.querySelector("#week_total .data");
+                weekTimeEl.innerText = response.totals.week;
+
+                var dayTimeEl = document.querySelector("#day_total .data");
+                dayTimeEl.innerText = response.totals.day;
+
                 var shiftTimeEl = document.querySelector('#shift_time .data');
                 shiftTimeEl.innerText = response.status.shift_time
 
