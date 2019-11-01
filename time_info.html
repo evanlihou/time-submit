@@ -32,6 +32,7 @@
         <a href="options.html" target="_blank">Settings</a>
         <div id="blur_warning" class=""></div>
         <div id="is_clocked_in"></div>
+        <h4 id="job_name"></h4>
 
         <div class="d-flex justify-content-around">
             <div id="day_total"><label>Today:</label> <span class="data"></span></div>
@@ -43,6 +44,8 @@
         <div id="shift_span" class="form-group"><span class="data"></span></div>
 
         <div id="shift_notes" class="form-group"><label>Shift Notes:</label><textarea class="data form-control"></textarea><span class="saved" style="opacity: 0">Saved.</span></div>
+
+        <div id="custom_fields" class="form-group"></div>
 
         <button class="btn btn-success btn-block" id="clock_in" data-toggle="modal" data-target="#confirm_modal">Clock In</button>
         <button class="btn btn-warning btn-block" id="clock_out" data-toggle="modal" data-target="#confirm_modal">Clock Out</button>

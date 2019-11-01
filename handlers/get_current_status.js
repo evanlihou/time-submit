@@ -67,6 +67,11 @@ function callApiForCurrent(request, sendResponse, cache) {
         Promise.all(apiCallPromises).then(([current_totals_response, payroll_response]) => {
             if (current_totals_response.supplemental_data.timesheets)
                 var timesheet = current_totals_response.supplemental_data.timesheets[current_totals_response.results.current_totals[items.tsheets_user_id].timesheet_id];
+            
+            var weekTotalSeconds = 0;
+            weekTotalSeconds += payroll_response.results.payroll_report[items.tsheets_user_id] ? payroll_response.results.payroll_report[items.tsheets_user_id].total_work_seconds : 0;
+            weekTotalSeconds += current_totals_response.results.current_totals[items.tsheets_user_id].shift_seconds;
+
             var retVal = {
                 status: {
                     timesheetId: current_totals_response.results.current_totals[items.tsheets_user_id].timesheet_id,
@@ -77,16 +82,52 @@ function callApiForCurrent(request, sendResponse, cache) {
                     shift_notes: timesheet ? timesheet.notes : null
                 },
                 totals: {
-                    week: secondsToHumanReadable(payroll_response.results.payroll_report[items.tsheets_user_id].total_work_seconds),
+                    week: secondsToHumanReadable(weekTotalSeconds),
                     day: secondsToHumanReadable(current_totals_response.results.current_totals[items.tsheets_user_id].day_seconds)
                 }
             }
-            console.log(retVal)
-            sendResponse(retVal)
-            if (request !== null && request.getNow.updateIcon === true) {
-                setIconStatus(retVal);
+
+            if (retVal.status.clockedIn) {
+                retVal.status.jobName = current_totals_response.supplemental_data.jobcodes[timesheet.jobcode_id].name
             }
-            cache.data = retVal;
+
+            var fieldItemPromises = [];
+            if (current_totals_response.results.current_totals[items.tsheets_user_id].on_the_clock && timesheet && timesheet.customfields && current_totals_response.supplemental_data.customfields ) {
+                retVal.customFields = {}
+
+                for (let [key, val] of Object.entries(timesheet.customfields)) {
+                    var fieldInfo = current_totals_response.supplemental_data.customfields[key];
+                    retVal.customFields[key] = {
+                        name: fieldInfo.name,
+                        shortCode: fieldInfo.short_code,
+                        type: fieldInfo.ui_preference,
+                        value: val
+                    }
+                    if (fieldInfo.ui_preference === 'drop_down') {
+                        // Get options
+                        retVal.customFields[key].options = [];
+                        fieldItemPromises.push(fetch('https://rest.tsheets.com/api/v1/customfielditems?customfield_id=' + key, {
+                            method: 'GET',
+                            headers: tsheets_headers
+                        }).then(resp => resp.json()).then(resp => {
+                            for (let [_, opt] of Object.entries(resp.results.customfielditems))
+                            retVal.customFields[key].options.push({
+                                id: opt.id,
+                                text: opt.name
+                            });
+                        }));
+                        
+                    }
+                }
+            }
+            Promise.all(fieldItemPromises).then(() => {
+                console.log(retVal)
+                sendResponse(retVal)
+                if (request !== null && request.getNow.updateIcon === true) {
+                    setIconStatus(retVal);
+                }
+                cache.data = retVal;
+            });
         });
     });
 }

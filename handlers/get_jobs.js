@@ -57,6 +57,8 @@ function getJobs(request, _sender, sendResponse) {
         }).then(response => {
                 var jobs = [];
                 for (var assignment in response.results.jobcode_assignments) {
+                    // Ignore jobs not assigned to the user (for some reason they get returned?)
+                    if (response.results.jobcode_assignments[assignment].user_id != items.tsheets_user_id) continue;
                     var job = response.supplemental_data.jobcodes[response.results.jobcode_assignments[assignment].jobcode_id];
                     jobs.push({
                         id: job.id,

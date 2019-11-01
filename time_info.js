@@ -9,6 +9,9 @@ class TimeInfo {
         this.shiftNotesEl = document.getElementById('shift_notes')
         this.shiftNotesInput = this.shiftNotesEl.getElementsByTagName('textarea')[0]
 
+        this.customFieldsContainer = document.getElementById('custom_fields')
+        this.customFieldsEls = {};
+
         this.confirmModalEl = document.getElementById('confirm_modal');
         this.confirmModal = new Modal(this.confirmModalEl, {});
 
@@ -86,6 +89,7 @@ class TimeInfo {
                 clockOutConfirmButton.onclick = () => {
                     chrome.runtime.sendMessage({clockOut: {timesheetId: this.timesheetId}}, (response) => {
                         if (!response.error) this.confirmModal.hide();
+                        this.heartbeat();
                     });
                     }
             } else {
@@ -108,6 +112,7 @@ class TimeInfo {
                     var jobId = document.getElementById('jobs-select').value;
                     chrome.runtime.sendMessage({clockIn: {jobId: jobId}}, (response) => {
                         if (!response.error) this.confirmModal.hide();
+                        this.heartbeat();
                     });
                 }
                 var jobsSelectEl = document.getElementById('jobs-select');
@@ -141,9 +146,43 @@ class TimeInfo {
                 if (response.status.clockedIn) {
                     isClockedInEl.innerText = 'Clocked In'
                     isClockedInEl.className = 'alert alert-success'
+                    var jobNameEl = document.getElementById('job_name');
+                    jobNameEl.innerText = 'Job: ' + response.status.jobName;
                     
                     this.clockInButton.style.display = 'none'
                     this.clockOutButton.style.display = 'block'
+
+                    // Show custom field info
+                    if (response.customFields) {
+                        for (let [key, val] of Object.entries(response.customFields)) {
+                            if (this.customFieldsEls[key]) continue;
+                            var field;
+                            if (val.type === "drop_down") {
+                                console.log(val.options);
+                                field = document.createElement('select');
+                                for (let opt of val.options) {
+                                    // !! HACK, it feels like the value should be the ID of the customfielditem, but it's the name instead
+                                    if (opt.name === val.value) {
+                                        val.value = opt.id;
+                                    }
+                                    // !! end hack
+                                    
+                                    var optionEl = document.createElement('option');
+                                    optionEl.value = opt.id;
+                                    optionEl.innerText = opt.text;
+                                    field.appendChild(optionEl);
+                                }
+ 
+                            } else {
+                                field = document.createElement('input');
+                                field.innerText = key;
+                            }
+                            field.name = key;
+                            field.value = val.value;
+                            this.customFieldsEls[key] = field;
+                            this.customFieldsContainer.appendChild(field);
+                        }
+                    }
                 } else {
                     isClockedInEl.innerText = 'Clocked Out'
                     isClockedInEl.className = 'alert alert-warning'
@@ -163,7 +202,7 @@ class TimeInfo {
 
                 if (response.status.timesheetId) {
                     if (!this.notesEdited)
-                    this.shiftNotesInput.value = response.status.shift_notes
+                        this.shiftNotesInput.value = response.status.shift_notes
 
                     var start = new Date(response.status.start);
                     var end = response.status.end ? new Date(response.status.end) : null;
