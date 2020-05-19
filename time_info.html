@@ -25,6 +25,20 @@
                     background-color: #0008;
                     display: none;
                 }
+
+                #todays_notes_div table td, #todays_notes_div table th {
+                    text-align: left;
+                    margin: 2px 7px;
+                }
+
+                .sucessable {
+                    transition: 1s linear color;
+                }
+
+                .success, .success:hover {
+                    color: #28a745;
+                    transition: none;
+                }
             </style>
     </head>
     <body style="display: none;">
@@ -49,6 +63,9 @@
 
         <button class="btn btn-success btn-block" id="clock_in" data-toggle="modal" data-target="#confirm_modal">Clock In</button>
         <button class="btn btn-warning btn-block" id="clock_out" data-toggle="modal" data-target="#confirm_modal">Clock Out</button>
+
+        <buton class="btn btn-link sucessable" style="cursor: pointer;" id="get_todays_notes">Copy Today's Notes</buton>
+        <div style="position: absolute; left: -500px; top: -500px;" id="todays_notes_div"></div>
 
         <div class="modal" tabindex="-1" role="dialog" id="confirm_modal">
             <div class="modal-dialog" role="document">

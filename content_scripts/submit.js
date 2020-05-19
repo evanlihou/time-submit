@@ -16,7 +16,7 @@ function fillTime() {
                 el.classList.remove('hide-weekends');
             });
             for (var day in response) {
-                var dayIndex = new Date(day + ' EDT').getDay(); // TZ Hack
+                var dayIndex = new Date(day + ' EST').getDay(); // TZ Hack
                 var el = document.querySelector('input.time.regular[data-day="' + dayIndex + '"]');
                 var comments = response[day].comments.join('\n');
                 el.value = Math.round(response[day].seconds / 60 / 60 * 10)/10;

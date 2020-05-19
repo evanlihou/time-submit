@@ -8,10 +8,13 @@ import updateNotes from './handlers/update_notes.js';
 import {clockIn, clockOut} from './handlers/clock_in_out.js';
 import getJobs from './handlers/get_jobs.js';
 import setIconStatus from './handlers/set_icon_status.js';
+import getTodaysNotes from './handlers/get_todays_notes.js';
 
 chrome.runtime.onMessage.addListener((...params) => {
     if (params[0].getNow)
         getCurrentStatus(...params);
+    else if (params[0].getTodaysNotes)
+        getTodaysNotes(...params);
     else if (params[0].getTimesheet)
         submitTime(...params);
     else if (params[0].updateNotes)

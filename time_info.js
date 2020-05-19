@@ -19,6 +19,8 @@ class TimeInfo {
         this.clockInConfirmButton = document.getElementById('clock_in_confirm')
 
         this.clockOutButton = document.getElementById('clock_out')
+
+        this.getTodaysNotesButton = document.getElementById('get_todays_notes');
         
         this.blurWarningEl = document.getElementById('blur_warning');
 
@@ -46,6 +48,32 @@ class TimeInfo {
             console.log('Got focus. Updates resumed.');
             this.blurWarningEl.style.display = 'none';
             this.blurWarningEl.style.opacity = 0;
+        }
+
+        this.getTodaysNotesButton.onclick = () => {
+            chrome.runtime.sendMessage({getTodaysNotes: true}, (response) => {
+                console.log(response);
+                var notesDiv = document.getElementById('todays_notes_div');
+                var tblContents = "<table><thead><tr><th>Project</th><th>Notes</th></tr></thead><tbody>";
+                for (var note of response.notes) {
+                    console.log(note);
+                    tblContents += "<tr><td>" + note.job_name + "</td><td>" + note.note + "</td></tr>";
+                }
+                tblContents += "</tbody></table>";
+                notesDiv.innerHTML = tblContents;
+
+                window.getSelection().removeAllRanges();
+                let range = document.createRange();
+                range.selectNode(notesDiv.firstElementChild);
+                window.getSelection().addRange(range);
+                document.execCommand('copy');
+                window.getSelection().removeAllRanges();
+
+                this.getTodaysNotesButton.classList.add('success');
+                setTimeout(() => {
+                    this.getTodaysNotesButton.classList.remove('success');
+                }, 2000);
+            });
         }
 
         var typingTimer;                //timer identifier

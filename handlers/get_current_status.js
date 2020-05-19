@@ -133,7 +133,9 @@ function callApiForCurrent(request, sendResponse, cache) {
 }
 
 function secondsToHumanReadable(seconds) {
-    return new Date(seconds * 1000).toISOString().substr(11, 5);
+    var numMinutes = Math.round(seconds / 60) % 60;
+    var numHours = Math.floor(seconds / 60 / 60);
+    return numHours + ":" + (numMinutes < 10 ? "0"+numMinutes : numMinutes);
 }
 
 Date.prototype.toISODateString = function () {
