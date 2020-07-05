@@ -35,7 +35,7 @@ function clockIn(request, _sender, sendResponse) {
                 type: 'regular',
                 start: new moment().format('Y-MM-DDTHH:mm:ssZ'),
                 end: '',
-                origin_hint_end: 'Timetrack Chrome Extension'
+                origin_hint_start: 'Timetrack Chrome Extension'
             }]
         });
 

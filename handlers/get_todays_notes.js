@@ -1,7 +1,13 @@
 import formatGetParams from '../helpers/formatGetParams.js';
 
+/**
+ * Get all of the notes for timesheets created today
+ * @param {object} request 
+ * @param {*} _sender 
+ * @param {function} sendResponse 
+ */
 export default function getTodaysNotes(request, _sender, sendResponse) {
-    console.log('Message: Getting today\'s notes');
+    console.log("Message: Getting today's notes");
     
     chrome.storage.sync.get({
         tsheets_token: '',
@@ -43,7 +49,6 @@ export default function getTodaysNotes(request, _sender, sendResponse) {
                 })
             }
 
-            console.log(results);
             sendResponse({
                 notes: results
             });

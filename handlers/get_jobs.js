@@ -32,7 +32,7 @@ function getJobs(request, _sender, sendResponse) {
         }
 
         var data = {
-            user_ids: items.tsheets_user_id,
+            user_ids: request.userId != null ? request.userId : items.tsheets_user_id,
             supplemental_data: 'yes',
             active: 'yes'
         }

@@ -132,6 +132,8 @@ function callApiForCurrent(request, sendResponse, cache) {
     });
 }
 
+// Helper to convert the number of seconds returned by TSheets into a format
+// that's easy to display
 function secondsToHumanReadable(seconds) {
     var numMinutes = Math.round(seconds / 60) % 60;
     var numHours = Math.floor(seconds / 60 / 60);

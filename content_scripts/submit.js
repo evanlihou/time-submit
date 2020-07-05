@@ -1,4 +1,5 @@
 function fillTime() {
+    // Example format: 202018 = 18th ISO-standard week in 2020
     const weekStr = document.getElementsByName('data[week_no]')[0].value;
     const week = {
         weekNo: weekStr.substring(4,6),
@@ -29,6 +30,7 @@ function fillTime() {
     })
 }
 
+// Handle the processing for ISO-standard week boundaries
 function getDateOfISOWeek(w, y) {
     var simple = new Date(y, 0, 1 + (w - 1) * 7);
     var dow = simple.getDay();
@@ -46,11 +48,11 @@ function getDateOfISOWeek(w, y) {
         end: ISOweekEnd
     };
 }
-
 Date.prototype.toISODateString = function () {
     return this.toISOString().slice(0,10);
 }
 
+// Create an element that can be used to run the script manually
 let autoFillButton = document.createElement('button');
 autoFillButton.addEventListener('click', fillTime, false)
 autoFillButton.innerText = 'Fill From TSheets';
